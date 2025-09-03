@@ -27,9 +27,17 @@ for (const addr of addrs) {
     //if (++count >= stop) break;
 }
 
+const streets = Object.keys(out);
+streets.sort();
+
 console.log('export default {');
-for (const st in out) {
-    console.log(`'${st}':`, out[st]);
+for (const st of streets) {
+    const addrs = [];
+    for (const num in out[st]) {
+        const ll = out[st][num];
+        addrs.push(`${num}:[${ll.join(',')}]`);
+    }
+    console.log(`'${st}':{${addrs.join(',')}},`);
 }
 console.log('};');
 
