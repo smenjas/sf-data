@@ -29,7 +29,7 @@ for (const addr of addrs) {
 
 console.log('export default {');
 for (const st in out) {
-    console.log(`${st}:`, out[st]);
+    console.log(`'${st}':`, out[st]);
 }
 console.log('};');
 
