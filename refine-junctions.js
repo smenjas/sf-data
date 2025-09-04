@@ -7,30 +7,39 @@
  * - Keep only the decimal portion, since all of SF is at 37°N 122°W.
  */
 
-import { distill, round } from './lib.js';
-import jcts from './data/sf-intersections-by-cnn.js';
+import { distillCoord } from './lib.js';
+import cnns from './data/Street_Intersections_20250625.js';
 
 const out = {};
 const decimals = 5;
-//const stop = 10;
-//let count = 0;
 
-for (const cnn in jcts) {
-    let { lat, lon } = jcts[cnn];
-    if (!(cnn in out)) {
-        out[cnn] = {};
+for (const obj of cnns) {
+    const { cnn, lat, lon, st_name, st_type } = obj;
+    const latDec = distillCoord(lat, decimals, 3);
+    const lonDec = distillCoord(lon, decimals, 5);
+    const street = `${st_name} ${st_type}`.trim();
+    if (cnn in out) {
+        //console.log('//', cnn, 'already exists');
+        if (latDec !== out[cnn].ll[0]) {
+            console.log('//  ', latDec, '!==', out[cnn].ll[0]);
+        }
+        if (lonDec !== out[cnn].ll[1]) {
+            console.log('//  ', lonDec, '!==', out[cnn].ll[1]);
+        }
+        out[cnn].streets.push(street);
+        continue;
     }
-    const latDec = distill(round(lat, decimals), 3);
-    const lonDec = distill(round(lon, decimals), 5);
-    out[cnn].coords = [latDec, lonDec];
-    out[cnn].streets = jcts[cnn].streets;
-    //console.log(`${lat},${lon}`, out[cnn]);
-    //if (++count >= stop) break;
+    out[cnn] = {};
+    out[cnn].ll = [latDec, lonDec];
+    out[cnn].streets = [street];
 }
 
 console.log('export default {');
 for (const cnn in out) {
-    console.log(`${cnn}:`, out[cnn], ',');
+    const jct = out[cnn];
+    const ll = jct.ll.join(',');
+    const streets = jct.streets.join("','");
+    console.log(`${cnn}:{ll:[${ll}],streets:['${streets}']},`);
 }
 console.log('};');
 
