@@ -8,38 +8,107 @@
  */
 
 import { distillCoord } from './lib.js';
-import cnns from './data/Street_Intersections_20250625.js';
+import segments from './data/Streets___Active_and_Retired_20250625.js';
+
+/**
+ * Remove trailing zeroes from a Centerline-Network Number (CNN).
+ * @param {string} cnn - A Centerline-Network Number
+ * @param {string} A Centerline-Network Number prefix
+ */
+function truncateCNN(cnn) {
+    if (!cnn) {
+        return cnn;
+    }
+    if (cnn.substring(5, 8) !== '000') {
+        console.log(cnn, 'does not end in: 000');
+        return cnn;
+    }
+    return parseInt(cnn.substring(0, 5));
+}
+
+/**
+ * Parse a line string of geographic coordinates into an array.
+ *
+ * @param {string} line - A line string
+ * @returns {Array.<number>} Decimal portion of degrees latitude and longitude
+ */
+function parseLine(line) {
+    // LINESTRING (-122.457446473 37.798032343, -122.457996647 37.797312546)
+    const decimals = 5;
+    const start = line.indexOf('(') + 1;
+    const stop = line.indexOf(')');
+    const pairs = line.substring(start, stop).split(',');
+    const lls = [];
+    for (let pair of pairs) {
+        pair = pair.trim();
+        const [lon, lat] = pair.split(' ');
+        const latDec = distillCoord(lat, decimals, 3);
+        const lonDec = distillCoord(lon, decimals, 5);
+        lls.push([latDec, lonDec]);
+    }
+    return lls;
+}
+
+/**
+ * Determine whether a street is a dead end.
+ *
+ * @param {string} street - A street name, maybe
+ * @returns {boolean} Whether the input indicates a dead end
+ */
+function isDeadEnd(street) {
+    return street === 'START' || street === 'END' ||
+        street.startsWith('START:') || street.startsWith('END:');
+}
 
 const out = {};
-const decimals = 5;
 
-for (const obj of cnns) {
-    const { cnn, lat, lon, st_name, st_type } = obj;
-    const latDec = distillCoord(lat, decimals, 3);
-    const lonDec = distillCoord(lon, decimals, 5);
-    const street = `${st_name} ${st_type}`.trim();
-    if (cnn in out) {
-        //console.log('//', cnn, 'already exists');
-        if (latDec !== out[cnn].ll[0]) {
-            console.log('//  ', latDec, '!==', out[cnn].ll[0]);
-        }
-        if (lonDec !== out[cnn].ll[1]) {
-            console.log('//  ', lonDec, '!==', out[cnn].ll[1]);
-        }
-        out[cnn].streets.push(street);
+for (const segment of segments) {
+    if (segment.active === 'false') continue;
+    if (segment.layer === 'PAPER') continue;
+    if (segment.layer === 'PAPER_FWYS') continue;
+    if (segment.layer === 'PAPER_WATER') continue;
+    //if (details.layer === 'STREETS_PEDESTRI') continue;
+    const fro = truncateCNN(segment.f_node_cnn);
+    const to = truncateCNN(segment.t_node_cnn);
+    if (!fro || !to) {
         continue;
     }
-    out[cnn] = {};
-    out[cnn].ll = [latDec, lonDec];
-    out[cnn].streets = [street];
+    const lls = parseLine(segment.line);
+    const re = /[#']/g;
+    if (!(fro in out)) {
+        out[fro] = { ll: lls[0], streets: [], adj: [] };
+        if (!isDeadEnd(segment.f_st)) {
+            out[fro].streets.push(segment.f_st.replaceAll(re, ''));
+        }
+    }
+    if (!(to in out)) {
+        out[to] = { ll: lls.at(-1), streets: [], adj: [] };
+        if (!isDeadEnd(segment.t_st)) {
+            out[to].streets.push(segment.t_st.replaceAll(re, ''));
+        }
+    }
+    const streetname = segment.streetname.replaceAll(re, '');
+    if (!out[fro].streets.includes(streetname)) {
+        out[fro].streets.push(streetname);
+    }
+    if (!out[to].streets.includes(streetname)) {
+        out[to].streets.push(streetname);
+    }
+    if (segment.oneway !== 'T' && !out[fro].adj.includes(to)) {
+        out[fro].adj.push(to);
+    }
+    if (segment.oneway !== 'F' && !out[to].adj.includes(fro)) {
+        out[to].adj.push(fro);
+    }
 }
 
 console.log('export default {');
 for (const cnn in out) {
     const jct = out[cnn];
     const ll = jct.ll.join(',');
-    const streets = jct.streets.join("','");
-    console.log(`${cnn}:{ll:[${ll}],streets:['${streets}']},`);
+    const streets = jct.streets.sort().join("','");
+    const adj = jct.adj.sort().join(',');
+    console.log(`${cnn}:{ll:[${ll}],streets:['${streets}'],adj:[${adj}]},`);
 }
 console.log('};');
 
