@@ -62,6 +62,7 @@ function isDeadEnd(street) {
 
 const walking = true;
 const out = {};
+const re = /[#']/g;
 
 for (const segment of segments) {
     if (segment.active === 'false') continue;
@@ -81,7 +82,6 @@ for (const segment of segments) {
         continue;
     }
     const lls = parseLine(segment.line);
-    const re = /[#']/g;
     if (!(fro in out)) {
         out[fro] = { ll: lls[0], streets: [], adj: [] };
         if (!isDeadEnd(segment.f_st)) {
