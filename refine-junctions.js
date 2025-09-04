@@ -60,6 +60,7 @@ function isDeadEnd(street) {
         street.startsWith('START:') || street.startsWith('END:');
 }
 
+const walking = true;
 const out = {};
 
 for (const segment of segments) {
@@ -67,7 +68,13 @@ for (const segment of segments) {
     if (segment.layer === 'PAPER') continue;
     if (segment.layer === 'PAPER_FWYS') continue;
     if (segment.layer === 'PAPER_WATER') continue;
-    //if (details.layer === 'STREETS_PEDESTRI') continue;
+    //if (segment.layer === 'PRIVATE') continue;
+    if (segment.layer === 'PRIVATE_PARKING') continue;
+    //if (segment.layer === 'PSEUDO') continue;
+    if (!walking) {
+        if (details.layer === 'STREETS_PEDESTRI') continue;
+        if (segment.layer === 'UPROW') continue;
+    }
     const fro = truncateCNN(segment.f_node_cnn);
     const to = truncateCNN(segment.t_node_cnn);
     if (!fro || !to) {
