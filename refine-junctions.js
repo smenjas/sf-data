@@ -60,12 +60,16 @@ function isDeadEnd(street) {
         street.startsWith('START:') || street.startsWith('END:');
 }
 
+const driving = true;
 const walking = true;
 const out = {};
 const re = /[#']/g;
 
 for (const segment of segments) {
     if (segment.active === 'false') continue;
+    if (!driving) {
+        if (segment.layer === 'FREEWAYS') continue;
+    }
     if (segment.layer === 'PAPER') continue;
     if (segment.layer === 'PAPER_FWYS') continue;
     if (segment.layer === 'PAPER_WATER') continue;
