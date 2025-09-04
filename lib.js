@@ -21,6 +21,18 @@ export function distill(num, start) {
 }
 
 /**
+ * Distill the decimal portion of degrees latitude or longitude.
+ *
+ * @param {number} coord - Decimal degrees latitude or longitude
+ * @param {number} precision - How many decimal places to keep
+ * @param {number} start - How many characters to remove from the beginning
+ * @returns {number} The decimal portion, as an integer
+ */
+export function distillCoord(coord, decimals, start) {
+    return distill(round(coord, decimals), start);
+}
+
+/**
  * Round a decimal number to a given precision.
  *
  * @param {number} num - The number to round
