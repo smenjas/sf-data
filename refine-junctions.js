@@ -70,8 +70,8 @@ for (const segment of segments) {
     if (segment.layer === 'PAPER_WATER') continue;
     //if (segment.layer === 'PRIVATE') continue;
     if (segment.layer === 'PRIVATE_PARKING') continue;
-    //if (segment.layer === 'PSEUDO') continue;
     if (!walking) {
+        if (segment.layer === 'PSEUDO') continue;
         if (details.layer === 'STREETS_PEDESTRI') continue;
         if (segment.layer === 'UPROW') continue;
     }
