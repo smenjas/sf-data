@@ -3,8 +3,7 @@
  */
 
 import jcts from './data/sf-junctions.js';
-//import jctDetails from './data/sf-streets-and-intersections.js';
-import jctDetails from './data/streets.js';
+import jctDetails from './data/Streets___Active_and_Retired_20250625.js';
 
 /**
  * Remove trailing zeroes from a Centerline-Network Number (CNN).
@@ -29,8 +28,7 @@ for (let cnn in jcts) {
     cnn = truncateCNN(cnn);
     //if (!jct.streets.includes('WATERVILLE ST')) continue;
     const adj = [];
-    for (const c in jctDetails) {
-        const d = jctDetails[c];
+    for (const d of jctDetails) {
         if (d.active === 'false') continue;
         if (d.layer === 'PAPER') continue;
         if (d.layer === 'PAPER_FWYS') continue;
@@ -54,11 +52,11 @@ for (let cnn in jcts) {
             if (!adj.includes(fro)) adj.push(fro);
         }
     }
-    if (!('coords' in jct) || !Array.isArray(jct.coords) || jct.coords.length < 2) {
-        console.log('//', cnn, 'doesn\'t have coords!', jct.coords);
+    if (!('ll' in jct) || !Array.isArray(jct.ll) || jct.ll.length < 2) {
+        console.log('//', cnn, 'doesn\'t have ll!', jct.ll);
         continue;
     }
-    if (!('streets' in jct) || !Array.isArray(jct.coords) || jct.coords.length < 1) {
+    if (!('streets' in jct) || !Array.isArray(jct.ll) || jct.ll.length < 1) {
         console.log('//', cnn, 'doesn\'t have streets!', jct.streets);
         continue;
     }
@@ -67,7 +65,7 @@ for (let cnn in jcts) {
         continue;
     }
     out[cnn] = {
-        ll: [jct.coords[0], jct.coords[1]],
+        ll: jct.ll,
         streets: jct.streets.sort(),
         adj: adj.sort()
     };
