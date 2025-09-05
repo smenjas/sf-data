@@ -79,6 +79,18 @@ function createJunction(ll, street) {
     return jct;
 }
 
+/**
+ * Add an element to an array, if it's not already there.
+ *
+ * @param {Array} array - An array
+ * @param {*} value - A value
+ */
+function addElement(array, value) {
+    if (!array.includes(value)) {
+        array.push(value);
+    }
+}
+
 const driving = true;
 const walking = true;
 const out = {};
@@ -112,17 +124,13 @@ for (const segment of segments) {
         out[to] = createJunction(lls.at(-1), segment.t_st);
     }
     const streetname = segment.streetname.replaceAll(re, '');
-    if (!out[fro].streets.includes(streetname)) {
-        out[fro].streets.push(streetname);
+    addElement(out[fro].streets, streetname);
+    addElement(out[to].streets, streetname);
+    if (segment.oneway !== 'T') {
+        addElement(out[fro].adj, to);
     }
-    if (!out[to].streets.includes(streetname)) {
-        out[to].streets.push(streetname);
-    }
-    if (segment.oneway !== 'T' && !out[fro].adj.includes(to)) {
-        out[fro].adj.push(to);
-    }
-    if (segment.oneway !== 'F' && !out[to].adj.includes(fro)) {
-        out[to].adj.push(fro);
+    if (segment.oneway !== 'F') {
+        addElement(out[to].adj, fro);
     }
 }
 
