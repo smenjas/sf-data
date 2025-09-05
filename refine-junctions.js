@@ -64,6 +64,21 @@ function isDeadEnd(street) {
         street.startsWith('START:') || street.startsWith('END:');
 }
 
+/**
+ * Create a junction object.
+ *
+ * @param {Array.<number>} ll - Decimal portion of degrees latitude & longitude
+ * @param {string} street - A street name
+ * @returns {Object.<string, Array>} A junction object
+ */
+function createJunction(ll, street) {
+    const jct = { ll: ll, streets: [], adj: [] };
+    if (!isDeadEnd(street)) {
+        jct.streets.push(street.replaceAll(re, ''));
+    }
+    return jct;
+}
+
 const driving = true;
 const walking = true;
 const out = {};
@@ -91,16 +106,10 @@ for (const segment of segments) {
     }
     const lls = parseLine(segment.line);
     if (!(fro in out)) {
-        out[fro] = { ll: lls[0], streets: [], adj: [] };
-        if (!isDeadEnd(segment.f_st)) {
-            out[fro].streets.push(segment.f_st.replaceAll(re, ''));
-        }
+        out[fro] = createJunction(lls[0], segment.f_st);
     }
     if (!(to in out)) {
-        out[to] = { ll: lls.at(-1), streets: [], adj: [] };
-        if (!isDeadEnd(segment.t_st)) {
-            out[to].streets.push(segment.t_st.replaceAll(re, ''));
-        }
+        out[to] = createJunction(lls.at(-1), segment.t_st);
     }
     const streetname = segment.streetname.replaceAll(re, '');
     if (!out[fro].streets.includes(streetname)) {
