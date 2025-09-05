@@ -29,11 +29,15 @@ function truncateCNN(cnn) {
 /**
  * Parse a line string of geographic coordinates into an array.
  *
+ * @example
+ * const line = 'LINESTRING (-122.457446473 37.798032343, -122.457996647 37.797312546)';
+ * const lls = parseLine(line);
+ * // Returns: [[79803, 45745], [79731, 458]]
+ *
  * @param {string} line - A line string
  * @returns {Array.<number>} Decimal portion of degrees latitude and longitude
  */
 function parseLine(line) {
-    // LINESTRING (-122.457446473 37.798032343, -122.457996647 37.797312546)
     const decimals = 5;
     const start = line.indexOf('(') + 1;
     const stop = line.indexOf(')');
