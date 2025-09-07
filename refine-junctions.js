@@ -97,7 +97,7 @@ const out = {};
 const re = /[#']/g;
 
 for (const segment of segments) {
-    if (segment.active === 'false') continue;
+    //if (segment.active === 'false') continue;
     if (!driving) {
         if (segment.layer === 'FREEWAYS') continue;
     }
