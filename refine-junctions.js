@@ -92,7 +92,7 @@ function addElement(array, value) {
 }
 
 const driving = true;
-const walking = true;
+const walking = false;
 const out = {};
 const re = /[#']/g;
 
@@ -108,7 +108,7 @@ for (const segment of segments) {
     if (segment.layer === 'PRIVATE_PARKING') continue;
     if (!walking) {
         if (segment.layer === 'PSEUDO') continue;
-        if (details.layer === 'STREETS_PEDESTRI') continue;
+        if (segment.layer === 'STREETS_PEDESTRI') continue;
         if (segment.layer === 'UPROW') continue;
     }
     const fro = truncateCNN(segment.f_node_cnn);
