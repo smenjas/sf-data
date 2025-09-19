@@ -26,6 +26,10 @@ function truncateCNN(cnn) {
     return parseInt(cnn.substring(0, 5));
 }
 
+function parseClassCode(classcode) {
+    return (classcode === '') ? null : parseInt(classcode);
+}
+
 /**
  * Parse a line string of geographic coordinates into an array.
  *
@@ -105,28 +109,26 @@ for (const segment of segments) {
     if (!fro || !to) {
         continue;
     }
-    const lls = parseLine(segment.line);
-    if (lls.length < 3) {
-        continue;
-    }
-    lls.shift();
-    lls.pop();
-    const key = [fro, to].sort().join('-');
-    if (key.startsWith(to)) {
-        lls.reverse();
-    }
-    out[key] = lls;
+    const line = parseLine(segment.line);
+    const code = parseClassCode(segment.classcode);
+    out[cnn] = { f: fro, t: to, line, code, street: segment.streetname };
 }
 
 console.log('export default {');
-for (const key in out) {
-    const lls = out[key];
-    let pairs = [];
-    for (const ll of lls) {
-        const pair = ll.join(',');
-        pairs.push(`[${pair}]`);
+for (const cnn in out) {
+    const segment = out[cnn];
+    let line = [];
+    for (const ll of segment.line) {
+        line.push(`[${ll.join(',')}]`);
     }
-    console.log(`'${key}':[${pairs.join(',')}],`);
+    const props = [
+        `f:${segment.f}`,
+        `t:${segment.t}`,
+        `code:${segment.code}`,
+        `street:'${segment.street}'`,
+        `line:[${line.join(',')}]`,
+    ];
+    console.log(`${cnn}:{${props.join(',')},`);
 }
 console.log('};');
 
