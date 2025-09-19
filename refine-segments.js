@@ -128,7 +128,7 @@ for (const cnn in out) {
         `street:'${segment.street}'`,
         `line:[${line.join(',')}]`,
     ];
-    console.log(`${cnn}:{${props.join(',')},`);
+    console.log(`${cnn}:{${props.join(',')}},`);
 }
 console.log('};');
 
