@@ -104,14 +104,18 @@ for (const segment of segments) {
     if (cnn in out) {
         console.log('//', cnn, 'already present.');
     }
-    const fro = truncateCNN(segment.f_node_cnn);
-    const to = truncateCNN(segment.t_node_cnn);
-    if (!fro || !to) {
+    const f = truncateCNN(segment.f_node_cnn);
+    const t = truncateCNN(segment.t_node_cnn);
+    if (!f || !t) {
         continue;
     }
     const line = parseLine(segment.line);
     const code = parseClassCode(segment.classcode);
-    out[cnn] = { f: fro, t: to, line, code, street: segment.streetname };
+    const street = segment.streetname;
+    const to =
+        segment.oneway === 'T' ? t :
+        segment.oneway === 'F' ? f : null;
+    out[cnn] = { f, t, to, code, street, line };
 }
 
 console.log('export default {');
@@ -124,6 +128,7 @@ for (const cnn in out) {
     const props = [
         `f:${segment.f}`,
         `t:${segment.t}`,
+        `to:${segment.to}`,
         `code:${segment.code}`,
         `street:'${segment.street}'`,
         `line:[${line.join(',')}]`,
